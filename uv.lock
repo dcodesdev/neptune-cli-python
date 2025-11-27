@@ -567,18 +567,9 @@ wheels = [
 [[package]]
 name = "neptune-api"
 version = "0.1.0"
-source = { editable = "../neptune-api" }
+source = { git = "ssh://git@github.com/brokad/neptune-api.git?rev=main#2ed8997b343a3811ca4d4195578787b7a93d1466" }
 dependencies = [
     { name = "pydantic" },
-]
-
-[package.metadata]
-requires-dist = [{ name = "pydantic", specifier = ">=2.12.5" }]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pytest", specifier = ">=9.0.1" },
-    { name = "ruff", specifier = ">=0.14.6" },
 ]
 
 [[package]]
@@ -609,7 +600,7 @@ requires-dist = [
     { name = "click", specifier = ">=8.1.0" },
     { name = "fastmcp", specifier = ">=2.13.0.2" },
     { name = "loguru", specifier = ">=0.7.3" },
-    { name = "neptune-api", editable = "../neptune-api" },
+    { name = "neptune-api", git = "ssh://git@github.com/brokad/neptune-api.git?rev=main" },
     { name = "pydantic-settings", specifier = ">=2.11.0" },
     { name = "pytest", marker = "extra == 'dev'" },
     { name = "requests", specifier = ">=2.32.5" },

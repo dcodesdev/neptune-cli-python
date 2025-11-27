@@ -10,7 +10,7 @@ dependencies = [
 	"loguru>=0.7.3",
 	"pydantic-settings>=2.11.0",
 	"requests>=2.32.5",
-	"neptune-api",
+	"neptune-api @ git+ssh://git@github.com/brokad/neptune-api.git@main",
 ]
 
 [project.optional-dependencies]
@@ -20,9 +20,6 @@ dev = [
 
 [tool.uv]
 package = true
-
-[tool.uv.sources]
-neptune-api = { path = "../neptune-api", editable = true }
 
 [dependency-groups]
 dev = [
