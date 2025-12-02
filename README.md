@@ -2,6 +2,8 @@
 
 Command-line interface for Neptune - deploy your backend to the cloud.
 
+For testing instructions, please read [these] (./TESTING.md) or go to `TESTING.MD`
+
 ## Installation
 
 Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
