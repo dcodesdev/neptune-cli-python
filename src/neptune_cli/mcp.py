@@ -12,7 +12,6 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
-from urllib.parse import urlparse
 
 from fastmcp import Context, FastMCP
 from loguru import logger as log
@@ -30,40 +29,14 @@ mcp = FastMCP("Neptune (neptune.dev) MCP", instructions=_load_instructions())
 
 
 # ==============================================================================
-# Helper: Get working directory from MCP context
+# Helper: Get project name from current directory
 # ==============================================================================
 
 
-async def _get_working_dir(ctx: Context) -> Path:
-    """Get the working directory from the MCP client's roots.
-
-    The MCP client (IDE) provides workspace roots that indicate where
-    the user's project is located. We use the first root as the working directory.
-
-    Falls back to cwd if no roots are provided (shouldn't happen in normal use).
-    """
+def _get_project_name() -> str | None:
+    """Try to get project name from current directory."""
     try:
-        roots = await ctx.list_roots()
-        if roots:
-            # Use the first root's URI (file:///path/to/project)
-            uri = str(roots[0].uri)
-            # Parse file:// URI to get path
-            parsed = urlparse(uri)
-            if parsed.scheme == "file":
-                return Path(parsed.path)
-    except Exception as e:
-        log.warning(f"Failed to get roots from MCP context: {e}")
-
-    # Fallback to cwd (shouldn't normally happen)
-    log.warning("No roots provided by MCP client, falling back to cwd")
-    return Path.cwd()
-
-
-async def _get_project_name(ctx: Context) -> str | None:
-    """Try to get project name from the MCP client's working directory."""
-    try:
-        working_dir = await _get_working_dir(ctx)
-        return resolve_project_name(working_dir)
+        return resolve_project_name(Path.cwd())
     except Exception:
         return None
 
@@ -134,7 +107,7 @@ def add_new_resource(kind: str) -> dict[str, Any]:
 
 
 @mcp.tool("get_dockerfile_guidance")
-async def get_dockerfile_guidance(ctx: Context) -> dict[str, Any]:
+def get_dockerfile_guidance() -> dict[str, Any]:
     """Get guidance for creating a Dockerfile for the current project.
 
     IMPORTANT: Use this tool BEFORE attempting to deploy if no Dockerfile exists.
@@ -150,7 +123,7 @@ async def get_dockerfile_guidance(ctx: Context) -> dict[str, Any]:
     """
     from neptune_cli.services import get_dockerfile_guidance as do_get_guidance
 
-    working_dir = await _get_working_dir(ctx)
+    working_dir = Path.cwd()
     guidance = do_get_guidance(working_dir)
 
     dockerfile_exists = (working_dir / "Dockerfile").exists()
@@ -175,7 +148,7 @@ async def get_dockerfile_guidance(ctx: Context) -> dict[str, Any]:
 
 
 @mcp.tool("provision_resources")
-async def provision_resources(ctx: Context) -> dict[str, Any]:
+def provision_resources() -> dict[str, Any]:
     """Provision necessary cloud resources for the current project as per its configuration
 
     If the working directory does not contain a 'neptune.json' file, an error message is returned.
@@ -185,7 +158,7 @@ async def provision_resources(ctx: Context) -> dict[str, Any]:
         NeptuneJsonNotFoundError,
     )
 
-    working_dir = await _get_working_dir(ctx)
+    working_dir = Path.cwd()
 
     try:
         result = do_provision(working_dir, on_status=lambda msg: log.info(msg))
@@ -212,7 +185,7 @@ async def provision_resources(ctx: Context) -> dict[str, Any]:
 
 
 @mcp.tool("deploy_project")
-async def deploy_project(ctx: Context) -> dict[str, Any]:
+def deploy_project() -> dict[str, Any]:
     """Deploy the current project.
 
     This only works after the project has been provisioned using 'provision_resources'.
@@ -234,12 +207,13 @@ async def deploy_project(ctx: Context) -> dict[str, Any]:
         DeploymentCreationError,
     )
 
-    working_dir = await _get_working_dir(ctx)
+    working_dir = Path.cwd()
 
     try:
         result = do_deploy(
             working_dir,
             skip_lint=True,  # MCP users handle lint separately
+            skip_spec=True,
             on_status=lambda msg: log.info(msg),
         )
         return {
@@ -334,14 +308,14 @@ async def deploy_project(ctx: Context) -> dict[str, Any]:
 
 
 @mcp.tool("get_deployment_status")
-async def get_deployment_status(ctx: Context) -> dict[str, Any]:
+def get_deployment_status() -> dict[str, Any]:
     """Get the status of the current deployment of a project and its provisioned resources.
 
     This will tell you about running resources the project is using, as well as the state of the service.
     """
     from neptune_cli.services import get_project_status, ProjectNotFoundError
 
-    project_name = await _get_project_name(ctx)
+    project_name = _get_project_name()
     if not project_name:
         log.error("Could not determine project name")
         return {
@@ -399,7 +373,7 @@ def list_projects_tool() -> dict[str, Any]:
 
 
 @mcp.tool("delete_project")
-async def delete_project_tool(ctx: Context, project_name: str | None = None) -> dict[str, Any]:
+def delete_project_tool(project_name: str | None = None) -> dict[str, Any]:
     """Delete a project and all its resources.
 
     WARNING: This permanently deletes the project and all associated resources
@@ -413,7 +387,7 @@ async def delete_project_tool(ctx: Context, project_name: str | None = None) -> 
 
     # Resolve project name
     if project_name is None:
-        project_name = await _get_project_name(ctx)
+        project_name = _get_project_name()
         if not project_name:
             return {
                 "status": "error",
@@ -441,7 +415,7 @@ async def delete_project_tool(ctx: Context, project_name: str | None = None) -> 
 
 
 @mcp.tool("wait_for_deployment")
-async def wait_for_deployment(ctx: Context) -> dict[str, Any]:
+def wait_for_deployment() -> dict[str, Any]:
     """Wait for the current project deployment to complete."""
     from neptune_cli.services import (
         wait_for_deployment as do_wait,
@@ -449,7 +423,7 @@ async def wait_for_deployment(ctx: Context) -> dict[str, Any]:
         DeploymentError,
     )
 
-    project_name = await _get_project_name(ctx)
+    project_name = _get_project_name()
     if not project_name:
         log.error("Could not determine project name")
         return {
@@ -510,7 +484,7 @@ async def set_secret_value(ctx: Context, secret_name: str) -> dict[str, Any]:
         ProjectNotFoundError,
     )
 
-    project_name = await _get_project_name(ctx)
+    project_name = _get_project_name()
     if not project_name:
         log.error("Could not determine project name")
         return {
@@ -572,7 +546,7 @@ async def set_secret_value(ctx: Context, secret_name: str) -> dict[str, Any]:
 
 
 @mcp.tool("get_database_connection_info")
-async def get_database_connection_info(ctx: Context, database_name: str) -> dict[str, Any]:
+def get_database_connection_info(database_name: str) -> dict[str, Any]:
     """Get the connection information for a database resource for the current project.
 
     Note the database must already exist in the neptune.json configuration of the project.
@@ -584,7 +558,7 @@ async def get_database_connection_info(ctx: Context, database_name: str) -> dict
         ProjectNotFoundError,
     )
 
-    project_name = await _get_project_name(ctx)
+    project_name = _get_project_name()
     if not project_name:
         log.error("Could not determine project name")
         return {
@@ -627,7 +601,7 @@ async def get_database_connection_info(ctx: Context, database_name: str) -> dict
 
 
 @mcp.tool("list_bucket_files")
-async def list_bucket_files(ctx: Context, bucket_name: str) -> dict[str, Any]:
+def list_bucket_files(bucket_name: str) -> dict[str, Any]:
     """List all files in a storage bucket resource for the current project.
 
     Note the bucket must already exist in the neptune.json configuration of the project.
@@ -639,7 +613,7 @@ async def list_bucket_files(ctx: Context, bucket_name: str) -> dict[str, Any]:
         ProjectNotFoundError,
     )
 
-    project_name = await _get_project_name(ctx)
+    project_name = _get_project_name()
     if not project_name:
         log.error("Could not determine project name")
         return {
@@ -678,7 +652,7 @@ async def list_bucket_files(ctx: Context, bucket_name: str) -> dict[str, Any]:
 
 
 @mcp.tool("get_bucket_object")
-async def get_bucket_object(ctx: Context, bucket_name: str, key: str) -> dict[str, str] | bytes:
+def get_bucket_object(bucket_name: str, key: str) -> dict[str, str] | bytes:
     """Retrieve an object from a storage bucket resource for the current project.
 
     Note the bucket must already exist in the neptune.json configuration of the project.
@@ -690,7 +664,7 @@ async def get_bucket_object(ctx: Context, bucket_name: str, key: str) -> dict[st
         ProjectNotFoundError,
     )
 
-    project_name = await _get_project_name(ctx)
+    project_name = _get_project_name()
     if not project_name:
         log.error("Could not determine project name")
         return {
@@ -730,11 +704,11 @@ async def get_bucket_object(ctx: Context, bucket_name: str, key: str) -> dict[st
 
 
 @mcp.tool("get_logs")
-async def get_logs(ctx: Context) -> dict[str, Any]:
+def get_logs() -> dict[str, Any]:
     """Retrieve the logs for the current project deployment."""
     from neptune_cli.services import get_logs as do_get_logs
 
-    project_name = await _get_project_name(ctx)
+    project_name = _get_project_name()
     if not project_name:
         log.error("Could not determine project name")
         return {
@@ -763,7 +737,7 @@ async def get_logs(ctx: Context) -> dict[str, Any]:
 
 
 @mcp.tool("run_ai_lint")
-async def run_ai_lint_tool(ctx: Context) -> dict[str, Any]:
+def run_ai_lint_tool() -> dict[str, Any]:
     """Run AI lint on the current project.
 
     Analyzes the project configuration and code to detect potential issues
@@ -778,7 +752,7 @@ async def run_ai_lint_tool(ctx: Context) -> dict[str, Any]:
     """
     from neptune_cli.services import run_ai_lint
 
-    working_dir = await _get_working_dir(ctx)
+    working_dir = Path.cwd()
 
     # Check for neptune.json first
     if not (working_dir / "neptune.json").exists():
