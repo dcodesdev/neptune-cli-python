@@ -10,6 +10,12 @@ from neptune_cli.utils import resolve_project_name
 
 
 @click.command("wait")
+@click.option(
+    "--output",
+    type=click.Choice(["normal", "json"]),
+    default=None,
+    help="Output format",
+)
 @click.option("--project-name", help="Explicit project name")
 @click.option(
     "--timeout",
@@ -20,6 +26,7 @@ from neptune_cli.utils import resolve_project_name
 @click.pass_context
 def wait_command(
     ctx: click.Context,
+    output: str | None,
     project_name: str | None,
     timeout: int,
 ) -> None:
@@ -34,7 +41,11 @@ def wait_command(
         DeploymentError,
     )
 
-    output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
+    # Local --output overrides parent group's setting
+    if output is not None:
+        output_mode = OutputMode(output)
+    else:
+        output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
     ui = NeptuneUI(output_mode)
 
     ui.header("Wait for Deployment")

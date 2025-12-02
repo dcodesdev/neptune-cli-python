@@ -13,6 +13,12 @@ from neptune_cli.utils import resolve_project_name
 
 @click.command("delete")
 @click.option(
+    "--output",
+    type=click.Choice(["normal", "json"]),
+    default=None,
+    help="Output format",
+)
+@click.option(
     "--project-name",
     help="Explicit project name to delete",
 )
@@ -23,7 +29,7 @@ from neptune_cli.utils import resolve_project_name
     help="Skip confirmation prompt",
 )
 @click.pass_context
-def delete_command(ctx: click.Context, project_name: str | None, yes: bool) -> None:
+def delete_command(ctx: click.Context, output: str | None, project_name: str | None, yes: bool) -> None:
     """Delete a project and all its resources."""
     from neptune_cli.services.project import (
         delete_project,
@@ -31,7 +37,11 @@ def delete_command(ctx: click.Context, project_name: str | None, yes: bool) -> N
         ProjectNotFoundError,
     )
 
-    output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
+    # Local --output overrides parent group's setting
+    if output is not None:
+        output_mode = OutputMode(output)
+    else:
+        output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
     verbose = ctx.obj.get("verbose", False)
     working_dir = ctx.obj.get("working_directory", Path.cwd())
     ui = NeptuneUI(output_mode, verbose=verbose)

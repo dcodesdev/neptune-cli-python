@@ -220,9 +220,7 @@ def wait_for_deployment(
             )
 
         if timeout is not None and (time.time() - start_time) > timeout:
-            raise TimeoutError(
-                f"Timeout waiting for deployment of '{project_name}' " f"(current state: {running_status})"
-            )
+            raise TimeoutError(f"Timeout waiting for deployment of '{project_name}' (current state: {running_status})")
 
         time.sleep(poll_interval)
 
@@ -264,8 +262,7 @@ def wait_for_provisioning(
 
         if timeout is not None and (time.time() - start_time) > timeout:
             raise TimeoutError(
-                f"Timeout waiting for provisioning of '{project_name}' "
-                f"(current state: {project.provisioning_state})"
+                f"Timeout waiting for provisioning of '{project_name}' (current state: {project.provisioning_state})"
             )
 
         time.sleep(poll_interval)

@@ -10,9 +10,17 @@ Requires Python 3.12+ and [uv](https://docs.astral.sh/uv/).
 uv tool install -e .
 ```
 
-## Quick Start
+To reinstall
 
 ```bash
+uv tool install -e . --force --reinstall
+```
+
+## Quick Start CLI
+
+```bash
+export NEPTUNE_AI_TOKEN=d1be6dcfea9f8a6d9ab3ef4f01e038bada71719fbefaf01a5e97b5758a2c75dc
+
 # Login to Neptune
 neptune login
 
@@ -30,20 +38,26 @@ neptune status
 
 The CLI can be configured via environment variables or a `.env` file:
 
-| Variable | Description |
-| -------- | ----------- |
+| Variable           | Description                                         |
+| ------------------ | --------------------------------------------------- |
 | `NEPTUNE_AI_TOKEN` | API token for AI service (spec generation, linting) |
-| `NEPTUNE_API_KEY` | API key for Neptune platform |
-| `NEPTUNE_API_URL` | Override platform API URL |
-| `NEPTUNE_AI_URL` | Override AI service URL |
+| `NEPTUNE_API_KEY`  | API key for Neptune platform                        |
+| `NEPTUNE_API_URL`  | Override platform API URL                           |
+| `NEPTUNE_AI_URL`   | Override AI service URL                             |
 
 Create a `.env` file in your project directory or `~/.config/neptune/.env`:
 
 ```bash
-NEPTUNE_AI_TOKEN=your_token_here
+export NEPTUNE_AI_TOKEN=your_token_here
 ```
 
 ## MCP Server
+
+Add token for AI service:
+
+```bash
+export NEPTUNE_AI_TOKEN=d1be6dcfea9f8a6d9ab3ef4f01e038bada71719fbefaf01a5e97b5758a2c75dc
+```
 
 For AI assistants (Cursor, VS Code, etc.):
 
@@ -55,14 +69,14 @@ neptune mcp
 
 ```json
 {
-  "servers": {
-    "neptune": {
-      "type": "stdio",
-      "command": "uv",
-      "args": ["run", "--project", "PATH_TO_NEPTUNE_CLI", "neptune", "mcp"]
-    }
-  },
-  "inputs": []
+    "servers": {
+        "neptune": {
+            "type": "stdio",
+            "command": "neptune",
+            "args": ["mcp"]
+        }
+    },
+    "inputs": []
 }
 ```
 
@@ -74,11 +88,11 @@ neptune mcp --transport http --port 8001
 
 ```json
 {
-  "mcpServers": {
-    "neptune": {
-      "url": "http://localhost:8001/mcp"
+    "mcpServers": {
+        "neptune": {
+            "url": "http://localhost:8001/mcp"
+        }
     }
-  }
 }
 ```
 
@@ -104,10 +118,10 @@ neptune mcp --transport http --port 8001
          └───────────────┘
 ```
 
-- **Services** (`src/neptune_cli/services/`) contain all business logic
-- **CLI** commands handle user interaction and output formatting
-- **MCP** tools expose the same functionality to AI assistants
-- Both CLI and MCP call the shared service layer, ensuring consistent behavior
+-   **Services** (`src/neptune_cli/services/`) contain all business logic
+-   **CLI** commands handle user interaction and output formatting
+-   **MCP** tools expose the same functionality to AI assistants
+-   Both CLI and MCP call the shared service layer, ensuring consistent behavior
 
 ## Commands
 

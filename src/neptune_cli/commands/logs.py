@@ -13,6 +13,12 @@ from neptune_cli.utils import resolve_project_name
 
 @click.command("logs")
 @click.option(
+    "--output",
+    type=click.Choice(["normal", "json"]),
+    default=None,
+    help="Output format",
+)
+@click.option(
     "--project-name",
     help="Explicit project name to fetch logs for",
 )
@@ -23,11 +29,15 @@ from neptune_cli.utils import resolve_project_name
     help="Follow log output (not yet implemented)",
 )
 @click.pass_context
-def logs_command(ctx: click.Context, project_name: str | None, follow: bool) -> None:
+def logs_command(ctx: click.Context, output: str | None, project_name: str | None, follow: bool) -> None:
     """Show logs for the current deployment."""
     from neptune_cli.services.logs import get_logs
 
-    output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
+    # Local --output overrides parent group's setting
+    if output is not None:
+        output_mode = OutputMode(output)
+    else:
+        output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
     verbose = ctx.obj.get("verbose", False)
     working_dir = ctx.obj.get("working_directory", Path.cwd())
     ui = NeptuneUI(output_mode, verbose=verbose)

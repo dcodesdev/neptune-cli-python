@@ -23,9 +23,15 @@ def resource_group() -> None:
 
 
 @resource_group.command("info")
+@click.option(
+    "--output",
+    type=click.Choice(["normal", "json"]),
+    default=None,
+    help="Output format",
+)
 @click.argument("kind", type=click.Choice(["Database", "StorageBucket", "Secret"]))
 @click.pass_context
-def resource_info(ctx: click.Context, kind: str) -> None:
+def resource_info(ctx: click.Context, output: str | None, kind: str) -> None:
     """Get information about a resource type.
 
     Shows documentation, neptune.json configuration examples, and code usage
@@ -35,7 +41,11 @@ def resource_info(ctx: click.Context, kind: str) -> None:
     """
     from neptune_cli.services.resources import get_resource_info
 
-    output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
+    # Local --output overrides parent group's setting
+    if output is not None:
+        output_mode = OutputMode(output)
+    else:
+        output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
     ui = NeptuneUI(output_mode)
 
     try:
@@ -77,8 +87,14 @@ def resource_info(ctx: click.Context, kind: str) -> None:
 
 
 @resource_group.command("provision")
+@click.option(
+    "--output",
+    type=click.Choice(["normal", "json"]),
+    default=None,
+    help="Output format",
+)
 @click.pass_context
-def resource_provision(ctx: click.Context) -> None:
+def resource_provision(ctx: click.Context, output: str | None) -> None:
     """Provision resources for the current project.
 
     Reads neptune.json and creates/updates all defined resources on Neptune's
@@ -90,7 +106,11 @@ def resource_provision(ctx: click.Context) -> None:
         NeptuneJsonNotFoundError,
     )
 
-    output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
+    # Local --output overrides parent group's setting
+    if output is not None:
+        output_mode = OutputMode(output)
+    else:
+        output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
     working_dir = ctx.obj.get("working_directory", Path.cwd())
     ui = NeptuneUI(output_mode)
 
@@ -155,12 +175,19 @@ def secret_group() -> None:
 
 
 @secret_group.command("set")
+@click.option(
+    "--output",
+    type=click.Choice(["normal", "json"]),
+    default=None,
+    help="Output format",
+)
 @click.argument("secret_name")
 @click.option("--project-name", help="Explicit project name")
 @click.option("--value", help="Secret value (will prompt if not provided)")
 @click.pass_context
 def secret_set(
     ctx: click.Context,
+    output: str | None,
     secret_name: str,
     project_name: str | None,
     value: str | None,
@@ -176,7 +203,11 @@ def secret_set(
     )
     from neptune_cli.services.project import ProjectNotFoundError
 
-    output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
+    # Local --output overrides parent group's setting
+    if output is not None:
+        output_mode = OutputMode(output)
+    else:
+        output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
     working_dir = ctx.obj.get("working_directory", Path.cwd())
     ui = NeptuneUI(output_mode)
 
@@ -282,11 +313,18 @@ def database_group() -> None:
 
 
 @database_group.command("info")
+@click.option(
+    "--output",
+    type=click.Choice(["normal", "json"]),
+    default=None,
+    help="Output format",
+)
 @click.argument("database_name")
 @click.option("--project-name", help="Explicit project name")
 @click.pass_context
 def database_info(
     ctx: click.Context,
+    output: str | None,
     database_name: str,
     project_name: str | None,
 ) -> None:
@@ -301,7 +339,11 @@ def database_info(
     )
     from neptune_cli.services.project import ProjectNotFoundError
 
-    output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
+    # Local --output overrides parent group's setting
+    if output is not None:
+        output_mode = OutputMode(output)
+    else:
+        output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
     working_dir = ctx.obj.get("working_directory", Path.cwd())
     ui = NeptuneUI(output_mode)
 
@@ -398,11 +440,18 @@ def bucket_group() -> None:
 
 
 @bucket_group.command("list")
+@click.option(
+    "--output",
+    type=click.Choice(["normal", "json"]),
+    default=None,
+    help="Output format",
+)
 @click.argument("bucket_name")
 @click.option("--project-name", help="Explicit project name")
 @click.pass_context
 def bucket_list(
     ctx: click.Context,
+    output: str | None,
     bucket_name: str,
     project_name: str | None,
 ) -> None:
@@ -413,7 +462,11 @@ def bucket_list(
     )
     from neptune_cli.services.project import ProjectNotFoundError
 
-    output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
+    # Local --output overrides parent group's setting
+    if output is not None:
+        output_mode = OutputMode(output)
+    else:
+        output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
     working_dir = ctx.obj.get("working_directory", Path.cwd())
     ui = NeptuneUI(output_mode)
 

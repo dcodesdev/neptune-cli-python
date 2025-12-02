@@ -11,8 +11,14 @@ from neptune_cli.ui import NeptuneUI
 
 
 @click.command("schema")
+@click.option(
+    "--output",
+    type=click.Choice(["normal", "json"]),
+    default=None,
+    help="Output format",
+)
 @click.pass_context
-def schema_command(ctx: click.Context) -> None:
+def schema_command(ctx: click.Context, output: str | None) -> None:
     """Fetch the JSON schema that defines valid neptune.json configurations.
 
     This schema is the authoritative reference for creating neptune.json files.
@@ -24,7 +30,11 @@ def schema_command(ctx: click.Context) -> None:
     """
     from neptune_cli.services.schema import get_project_schema
 
-    output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
+    # Local --output overrides parent group's setting
+    if output is not None:
+        output_mode = OutputMode(output)
+    else:
+        output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
     verbose = ctx.obj.get("verbose", False)
     ui = NeptuneUI(output_mode, verbose=verbose)
 

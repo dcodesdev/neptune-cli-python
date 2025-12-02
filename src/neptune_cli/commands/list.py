@@ -9,14 +9,24 @@ from neptune_cli.ui import NeptuneUI, spinner
 
 
 @click.command("list")
+@click.option(
+    "--output",
+    type=click.Choice(["normal", "json"]),
+    default=None,
+    help="Output format",
+)
 @click.argument("what", type=click.Choice(["projects"]), default="projects")
 @click.pass_context
-def list_command(ctx: click.Context, what: str) -> None:
+def list_command(ctx: click.Context, output: str | None, what: str) -> None:
     """List things in your Neptune account.
 
     Currently supports: projects
     """
-    output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
+    # Local --output overrides parent group's setting
+    if output is not None:
+        output_mode = OutputMode(output)
+    else:
+        output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
     verbose = ctx.obj.get("verbose", False)
     ui = NeptuneUI(output_mode, verbose=verbose)
 

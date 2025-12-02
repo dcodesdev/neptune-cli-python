@@ -59,8 +59,7 @@ def create_project_archive(
 
             if total_size > max_size:
                 raise ValueError(
-                    f"Archive size would exceed {max_size // (1024 * 1024)}MB limit. "
-                    f"Current size: {total_size} bytes"
+                    f"Archive size would exceed {max_size // (1024 * 1024)}MB limit. Current size: {total_size} bytes"
                 )
 
             rel_path = file_path.relative_to(root)

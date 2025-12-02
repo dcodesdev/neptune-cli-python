@@ -17,6 +17,12 @@ from neptune_cli.ui import (
 
 @click.command("deploy")
 @click.option(
+    "--output",
+    type=click.Choice(["normal", "json"]),
+    default=None,
+    help="Output format",
+)
+@click.option(
     "--skip-spec",
     is_flag=True,
     help="Skip spec generation and reuse existing neptune.json",
@@ -45,6 +51,7 @@ from neptune_cli.ui import (
 @click.pass_context
 def deploy_command(
     ctx: click.Context,
+    output: str | None,
     skip_spec: bool,
     skip_lint: bool,
     allow_ai_errors: bool,
@@ -81,7 +88,11 @@ def deploy_command(
     from neptune_cli.client import get_client
     from neptune_cli.utils import resolve_project_name
 
-    output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
+    # Local --output overrides parent group's setting
+    if output is not None:
+        output_mode = OutputMode(output)
+    else:
+        output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
     verbose = ctx.obj.get("verbose", False)
     working_dir = ctx.obj.get("working_directory", Path.cwd())
     ui = NeptuneUI(output_mode, verbose=verbose)

@@ -19,7 +19,13 @@ from loguru import logger as log
 from neptune_cli.utils import resolve_project_name
 
 
-mcp = FastMCP("Neptune (neptune.dev) MCP")
+def _load_instructions() -> str:
+    """Load MCP instructions from the instructions file."""
+    instructions_path = Path(__file__).parent / "mcp_instructions.md"
+    return instructions_path.read_text()
+
+
+mcp = FastMCP("Neptune (neptune.dev) MCP", instructions=_load_instructions())
 
 
 # ==============================================================================
@@ -238,7 +244,7 @@ def deploy_project() -> dict[str, Any]:
         return {
             "status": "error",
             "message": "neptune.json not found in the current directory",
-            "next_step": "create a 'neptune.json' file or use 'generate_spec' first",
+            "next_step": "use 'get_project_schema' to get the schema, then create a valid 'neptune.json' file",
         }
     except DockerBuildError as e:
         log.error(f"Docker build failed: {e}")
@@ -725,72 +731,8 @@ def get_logs() -> dict[str, Any]:
 
 
 # ==============================================================================
-# Generation & Linting
+# Linting
 # ==============================================================================
-
-
-@mcp.tool("generate_spec")
-def generate_spec_tool() -> dict[str, Any]:
-    """Generate neptune.json configuration for the current project.
-
-    Analyzes the project structure and code to automatically generate an
-    appropriate neptune.json configuration file.
-
-    This includes:
-    - Detecting the project type and workload kind
-    - Identifying required resources (databases, storage, secrets)
-    - Running AI lint to validate the configuration
-
-    After generation, review the neptune.json file and make any necessary
-    adjustments before provisioning.
-    """
-    from neptune_cli.services import generate_spec, SpecGenerationError
-
-    working_dir = Path.cwd()
-
-    try:
-        result = generate_spec(working_dir)
-        response = {
-            "status": "success",
-            "spec_path": str(result.spec_path),
-            "spec": result.spec,
-            "changed": result.changed,
-            "start_command": result.start_command,
-            "next_step": "review the generated neptune.json, then use 'provision_resources' to create the infrastructure",
-        }
-
-        if result.ai_lint_report:
-            response["ai_lint_report"] = {
-                "compatible": result.ai_lint_report.compatible,
-                "errors": len(result.ai_lint_report.errors),
-                "warnings": len(result.ai_lint_report.warnings),
-            }
-            if result.ai_lint_report.errors:
-                response["lint_errors"] = [
-                    {"code": e.code, "message": e.message, "suggestion": e.suggestion}
-                    for e in result.ai_lint_report.errors
-                ]
-            if result.ai_lint_report.warnings:
-                response["lint_warnings"] = [
-                    {"code": w.code, "message": w.message, "suggestion": w.suggestion}
-                    for w in result.ai_lint_report.warnings
-                ]
-
-        return response
-    except SpecGenerationError as e:
-        log.error(f"Failed to generate spec: {e}")
-        return {
-            "status": "error",
-            "message": str(e),
-            "next_step": "ensure you're in a valid project directory and try again",
-        }
-    except Exception as e:
-        log.error(f"Failed to generate spec: {e}")
-        return {
-            "status": "error",
-            "message": f"Failed to generate spec: {e}",
-            "next_step": "ensure you're in a valid project directory and try again",
-        }
 
 
 @mcp.tool("run_ai_lint")
@@ -815,8 +757,8 @@ def run_ai_lint_tool() -> dict[str, Any]:
     if not (working_dir / "neptune.json").exists():
         return {
             "status": "error",
-            "message": "neptune.json not found. Run 'generate_spec' first.",
-            "next_step": "use 'generate_spec' to create neptune.json, then run lint again",
+            "message": "neptune.json not found.",
+            "next_step": "use 'get_project_schema' to get the schema, create a valid neptune.json, then run lint again",
         }
 
     try:

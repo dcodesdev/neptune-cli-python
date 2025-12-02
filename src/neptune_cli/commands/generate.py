@@ -141,15 +141,25 @@ def generate_agents(ctx: click.Context) -> None:
 
 
 @generate_group.command("spec")
+@click.option(
+    "--output",
+    type=click.Choice(["normal", "json"]),
+    default=None,
+    help="Output format",
+)
 @click.pass_context
-def generate_spec(ctx: click.Context) -> None:
+def generate_spec(ctx: click.Context, output: str | None) -> None:
     """Generate neptune.json project specification."""
     from neptune_cli.services.generate import (
         generate_spec as do_generate_spec,
         SpecGenerationError,
     )
 
-    output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
+    # Local --output overrides parent group's setting
+    if output is not None:
+        output_mode = OutputMode(output)
+    else:
+        output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
     verbose = ctx.obj.get("verbose", False)
     working_dir = ctx.obj.get("working_directory", Path.cwd())
     ui = NeptuneUI(output_mode, verbose=verbose)

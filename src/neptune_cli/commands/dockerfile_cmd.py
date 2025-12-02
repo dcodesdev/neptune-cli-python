@@ -11,8 +11,14 @@ from neptune_cli.ui import NeptuneUI
 
 
 @click.command("dockerfile")
+@click.option(
+    "--output",
+    type=click.Choice(["normal", "json"]),
+    default=None,
+    help="Output format",
+)
 @click.pass_context
-def dockerfile_command(ctx: click.Context) -> None:
+def dockerfile_command(ctx: click.Context, output: str | None) -> None:
     """Get guidance for creating a Dockerfile.
 
     Analyzes the current project to detect its type and provides an
@@ -23,7 +29,11 @@ def dockerfile_command(ctx: click.Context) -> None:
     """
     from neptune_cli.services.deploy import get_dockerfile_guidance
 
-    output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
+    # Local --output overrides parent group's setting
+    if output is not None:
+        output_mode = OutputMode(output)
+    else:
+        output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
     working_dir = ctx.obj.get("working_directory", Path.cwd())
     ui = NeptuneUI(output_mode)
 

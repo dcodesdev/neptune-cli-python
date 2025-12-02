@@ -13,6 +13,12 @@ from neptune_cli.utils import resolve_project_name
 
 @click.command("lint")
 @click.option(
+    "--output",
+    type=click.Choice(["normal", "json"]),
+    default=None,
+    help="Output format",
+)
+@click.option(
     "--allow-ai-errors",
     is_flag=True,
     help="Ignore blocking AI lint errors",
@@ -25,13 +31,18 @@ from neptune_cli.utils import resolve_project_name
 @click.pass_context
 def lint_command(
     ctx: click.Context,
+    output: str | None,
     allow_ai_errors: bool,
     allow_ai_warnings: bool,
 ) -> None:
     """Run the AI linter against the current project."""
     from neptune_cli.services.lint import run_ai_lint
 
-    output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
+    # Local --output overrides parent group's setting
+    if output is not None:
+        output_mode = OutputMode(output)
+    else:
+        output_mode = ctx.obj.get("output_mode", OutputMode.NORMAL)
     verbose = ctx.obj.get("verbose", False)
     working_dir = ctx.obj.get("working_directory", Path.cwd())
     ui = NeptuneUI(output_mode, verbose=verbose)
