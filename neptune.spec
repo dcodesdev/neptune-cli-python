@@ -38,7 +38,6 @@ packages_to_collect = [
     'jsonschema_path',
     'openapi_pydantic',
     'pyperclip',
-    'python_dotenv',
     'dotenv',
     'rich',
     'websockets',
@@ -50,8 +49,8 @@ packages_to_collect = [
     'cachetools',
     'keyring',
     'jaraco',
-    'SecretStorage',
     'jeepney',
+    'secretstorage',
 ]
 
 for package in packages_to_collect:
@@ -97,7 +96,9 @@ a = Analysis(
     hookspath=[],
     hooksconfig={},
     runtime_hooks=['runtime_hook.py'],
-    excludes=[],
+    excludes=[
+        'authlib.integrations.sqla_oauth2',  # Requires sqlalchemy which we don't need
+    ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
     cipher=block_cipher,
