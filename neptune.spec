@@ -85,6 +85,7 @@ hiddenimports += [
     'codecs',
     'io',
     'sqlite3',
+    'difflib',
 ]
 
 a = Analysis(
