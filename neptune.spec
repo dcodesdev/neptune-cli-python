@@ -31,6 +31,7 @@ packages_to_collect = [
     'mcp',
     'diskcache',
     'key_value',
+    'beartype',
 ]
 
 for package in packages_to_collect:
