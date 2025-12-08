@@ -84,7 +84,7 @@ def login() -> dict[str, Any]:
     from neptune_cli.config import SETTINGS
 
     # Start local server to receive OAuth callback
-    port, httpd, thread = serve_callback_handler()
+    port, httpd, future = serve_callback_handler()
 
     # Build login URL
     params = urlencode({"redirect_uri": f"http://localhost:{port}/callback"})
@@ -102,7 +102,8 @@ def login() -> dict[str, Any]:
         }
 
     # Wait for callback
-    thread.join()
+    while not future.done():
+        time.sleep(0.5)
 
     if httpd.access_token is not None:
         SETTINGS.access_token = httpd.access_token
