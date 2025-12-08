@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 """PyInstaller spec file for Neptune CLI."""
 
-from PyInstaller.utils.hooks import collect_all, collect_submodules
+from PyInstaller.utils.hooks import collect_all, collect_submodules, collect_data_files
 
 block_cipher = None
 
@@ -12,6 +12,8 @@ hiddenimports = []
 
 # Packages that need full collection due to dynamic imports
 packages_to_collect = [
+    # Core
+    'neptune_cli',
     'pydantic',
     'pydantic_settings',
     'pydantic_core',
@@ -29,9 +31,27 @@ packages_to_collect = [
     'httpcore',
     'sse_starlette',
     'mcp',
-    'diskcache',
+    # fastmcp dependencies
+    'authlib',
+    'cyclopts',
+    'exceptiongroup',
+    'jsonschema_path',
+    'openapi_pydantic',
+    'pyperclip',
+    'python_dotenv',
+    'dotenv',
+    'rich',
+    'websockets',
+    # py-key-value-aio dependencies
     'key_value',
     'beartype',
+    'diskcache',
+    'pathvalidate',
+    'cachetools',
+    'keyring',
+    'jaraco',
+    'SecretStorage',
+    'jeepney',
 ]
 
 for package in packages_to_collect:
@@ -46,6 +66,9 @@ for package in packages_to_collect:
 # Add the mcp_instructions.md data file
 datas += [('src/neptune_cli/mcp_instructions.md', 'neptune_cli')]
 
+# Ensure diskcache submodules are collected
+hiddenimports += collect_submodules('diskcache')
+
 # Additional hidden imports for stdlib modules used dynamically
 hiddenimports += [
     'webbrowser',
@@ -56,6 +79,12 @@ hiddenimports += [
     'typing_extensions',
     'annotated_types',
     'email.mime.text',
+    'pickletools',
+    'pickle',
+    'struct',
+    'codecs',
+    'io',
+    'sqlite3',
 ]
 
 a = Analysis(
@@ -66,7 +95,7 @@ a = Analysis(
     hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
-    runtime_hooks=[],
+    runtime_hooks=['runtime_hook.py'],
     excludes=[],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
