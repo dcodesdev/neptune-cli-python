@@ -2,7 +2,7 @@
 set -e
 
 REPO="dcodesdev/neptune-cli-python"
-INSTALL_DIR="${INSTALL_DIR:-/usr/local/bin}"
+INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/bin}"
 BINARY_NAME="neptune"
 
 # Detect OS and architecture
@@ -50,13 +50,19 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 curl -fsSL "$LATEST_URL" -o "$TMP_DIR/$BINARY_NAME"
 chmod +x "$TMP_DIR/$BINARY_NAME"
 
+# Ensure install dir exists
+mkdir -p "$INSTALL_DIR"
+
 # Install
-if [[ -w "$INSTALL_DIR" ]]; then
-    mv "$TMP_DIR/$BINARY_NAME" "$INSTALL_DIR/$BINARY_NAME"
-else
-    echo "Installing to $INSTALL_DIR (requires sudo)"
-    sudo mv "$TMP_DIR/$BINARY_NAME" "$INSTALL_DIR/$BINARY_NAME"
-fi
+mv "$TMP_DIR/$BINARY_NAME" "$INSTALL_DIR/$BINARY_NAME"
 
 echo "Neptune CLI installed to $INSTALL_DIR/$BINARY_NAME"
+
+# Check if in PATH
+if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
+    echo ""
+    echo "Add $INSTALL_DIR to your PATH:"
+    echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
+fi
+
 echo "Run 'neptune --help' to get started"
