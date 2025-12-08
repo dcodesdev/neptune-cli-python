@@ -29,6 +29,8 @@ packages_to_collect = [
     'httpcore',
     'sse_starlette',
     'mcp',
+    'diskcache',
+    'key_value',
 ]
 
 for package in packages_to_collect:
