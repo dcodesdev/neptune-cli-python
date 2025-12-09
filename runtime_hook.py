@@ -4,3 +4,5 @@ import pickle
 import sqlite3
 import webbrowser
 import difflib
+import stringprep
+import encodings.idna

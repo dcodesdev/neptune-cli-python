@@ -51,6 +51,10 @@ packages_to_collect = [
     'jaraco',
     'jeepney',
     'secretstorage',
+    # requests dependencies
+    'urllib3',
+    'charset_normalizer',
+    'idna',
 ]
 
 for package in packages_to_collect:
@@ -85,6 +89,19 @@ hiddenimports += [
     'io',
     'sqlite3',
     'difflib',
+    # encodings and string handling
+    'stringprep',
+    'encodings.idna',
+    'idna',
+    # requests/urllib3 dependencies
+    'urllib3',
+    'urllib3.util',
+    'urllib3.util.ssl_',
+    'urllib3.contrib',
+    'charset_normalizer',
+    'chardet',
+    'socks',
+    'sockshandler',
 ]
 
 a = Analysis(
