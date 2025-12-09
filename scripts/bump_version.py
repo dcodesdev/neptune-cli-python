@@ -187,10 +187,17 @@ def main():
     if not update_pyproject_toml(new_version_str):
         sys.exit(1)
 
-    # Stage the pyproject.toml change
-    result = run_command('git add pyproject.toml', check=False)
+    # Update uv lock file
+    print("Updating uv.lock...")
+    result = run_command('uv lock', check=False)
     if result.returncode != 0:
-        print(f"Error staging pyproject.toml: {result.stderr}", file=sys.stderr)
+        print(f"Error updating uv.lock: {result.stderr}", file=sys.stderr)
+        sys.exit(1)
+
+    # Stage the pyproject.toml and uv.lock changes
+    result = run_command('git add pyproject.toml uv.lock', check=False)
+    if result.returncode != 0:
+        print(f"Error staging files: {result.stderr}", file=sys.stderr)
         sys.exit(1)
 
     # Commit the version change
