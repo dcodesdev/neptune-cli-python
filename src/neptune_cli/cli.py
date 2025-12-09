@@ -71,29 +71,29 @@ def upgrade(check: bool):
     from neptune_cli.upgrade import perform_upgrade, update_last_check_timestamp
 
     current = get_current_version()
-    log.info(f"Current version: {current}")
+    print(f"Current version: {current}")
 
-    log.info("Checking for updates...")
+    print("Checking for updates...")
     update_info = check_for_update()
 
     if update_info is None:
-        log.error("Failed to check for updates. Please check your network connection.")
+        print("Failed to check for updates. Please check your network connection.")
         sys.exit(1)
 
     if not update_info.update_available:
-        log.info("You are running the latest version")
+        print("You are running the latest version")
         update_last_check_timestamp()
         return
 
-    log.info(f"New version available: {update_info.latest_version}")
+    print(f"New version available: {update_info.latest_version}")
 
     if check:
-        log.info("Run 'neptune upgrade' to install the update")
+        print("Run 'neptune upgrade' to install the update")
         return
 
     if not is_running_as_binary():
-        log.warning("Not running as a compiled binary")
-        log.info("If installed via pip, use: pip install --upgrade neptune-cli")
+        print("Not running as a compiled binary")
+        print("If installed via pip, use: pip install --upgrade neptune-cli")
         return
 
     if perform_upgrade(update_info, silent=False):

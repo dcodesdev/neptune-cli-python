@@ -82,8 +82,8 @@ def perform_upgrade(update_info: UpdateInfo, silent: bool = False) -> bool:
     """
     if not is_running_as_binary():
         if not silent:
-            log.error("Cannot upgrade: not running as a compiled binary")
-            log.info("If installed via pip, use: pip install --upgrade neptune-cli")
+            print("Cannot upgrade: not running as a compiled binary")
+            print("If installed via pip, use: pip install --upgrade neptune-cli")
         return False
 
     current_exe = get_current_executable()
@@ -94,11 +94,11 @@ def perform_upgrade(update_info: UpdateInfo, silent: bool = False) -> bool:
 
     try:
         if not silent:
-            log.info(f"Downloading neptune {update_info.latest_version}...")
+            print(f"Downloading neptune {update_info.latest_version}...")
 
         if not download_binary(update_info.download_url, tmp_path):
             if not silent:
-                log.error("Failed to download update")
+                print("Failed to download update")
             return False
 
         if system != "windows":
@@ -112,14 +112,13 @@ def perform_upgrade(update_info: UpdateInfo, silent: bool = False) -> bool:
         if success:
             update_last_check_timestamp()
             if not silent:
-                log.info(f"Successfully upgraded to {update_info.latest_version}")
-                log.info("Please restart neptune to use the new version")
+                print(f"Successfully upgraded to {update_info.latest_version}")
 
         return success
 
     except Exception as e:
         if not silent:
-            log.error(f"Upgrade failed: {e}")
+            print(f"Upgrade failed: {e}")
         return False
     finally:
         if tmp_path.exists():
@@ -136,12 +135,12 @@ def _perform_unix_upgrade(current_exe: Path, new_binary: Path, silent: bool) -> 
         return True
     except PermissionError:
         if not silent:
-            log.error("Permission denied. Try running with sudo:")
-            log.error("  sudo neptune upgrade")
+            print("Permission denied. Try running with sudo:")
+            print("  sudo neptune upgrade")
         return False
     except Exception as e:
         if not silent:
-            log.error(f"Failed to replace binary: {e}")
+            print(f"Failed to replace binary: {e}")
         return False
 
 
@@ -159,11 +158,11 @@ def _perform_windows_upgrade(current_exe: Path, new_binary: Path, silent: bool) 
         return True
     except PermissionError:
         if not silent:
-            log.error("Permission denied. Try running as Administrator")
+            print("Permission denied. Try running as Administrator")
         return False
     except Exception as e:
         if not silent:
-            log.error(f"Failed to replace binary: {e}")
+            print(f"Failed to replace binary: {e}")
         if old_exe.exists() and not current_exe.exists():
             try:
                 old_exe.rename(current_exe)
