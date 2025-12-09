@@ -93,7 +93,6 @@ def upgrade(check: bool):
 
     if not is_running_as_binary():
         print("Not running as a compiled binary")
-        print("If installed via pip, use: pip install --upgrade neptune-cli")
         return
 
     if perform_upgrade(update_info, silent=False):
