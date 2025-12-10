@@ -377,7 +377,7 @@ def deploy_project(neptune_json_path: str, docker_context_path: str) -> dict[str
         "-t",
         deployment.image,
         "-f",
-        os.path.join(project_dir, "Dockerfile"),
+        os.path.join(build_context, "Dockerfile"),
         build_context,
     ]
     build_res = run_command(build_cmd, cwd=build_context)
