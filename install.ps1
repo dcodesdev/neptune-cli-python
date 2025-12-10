@@ -44,4 +44,5 @@ if ($UserPath -notlike "*$InstallDir*") {
     Write-Host "Restart your terminal for changes to take effect."
 }
 
-Write-Host "Run 'neptune --help' to get started"
+Write-Host ""
+Write-Host "Installation successful! You can now use Neptune in your MCP client."

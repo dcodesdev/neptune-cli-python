@@ -65,4 +65,5 @@ if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
     echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
 fi
 
-echo "Run 'neptune --help' to get started"
+echo ""
+echo "Installation successful! You can now use Neptune in your MCP client."
