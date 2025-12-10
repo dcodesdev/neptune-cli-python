@@ -298,7 +298,7 @@ def delete_project(neptune_json_path: str) -> dict[str, Any]:
 
 
 @mcp.tool("deploy_project")
-def deploy_project(neptune_json_path: str) -> dict[str, Any]:
+def deploy_project(neptune_json_path: str, docker_context_path: str) -> dict[str, Any]:
     """Deploy the current project.
 
     This only works after the project has been provisioned using 'provision_resources'.
@@ -306,6 +306,10 @@ def deploy_project(neptune_json_path: str) -> dict[str, Any]:
     UNDER THE HOOD: deployments are ECS tasks running on Fargate, with images stored in ECR. In particular, this tool builds an image using the Dockerfile in the current directory.
 
     Note: running tasks are *not* persistent; if the task stops or is redeployed, all data stored in the container is lost. Use provisioned resources (storage buckets, etc.) for persistent data storage.
+
+    Args:
+        neptune_json_path: Path to the neptune.json file.
+        docker_context_path: Path to the Docker build context directory (where the source code and dependencies are).
     """
     client = Client()
 
@@ -313,6 +317,7 @@ def deploy_project(neptune_json_path: str) -> dict[str, Any]:
         return validation_result
 
     project_dir = os.path.dirname(os.path.abspath(neptune_json_path))
+    build_context = os.path.abspath(docker_context_path)
 
     with open(neptune_json_path, "r") as f:
         project_data = f.read()
@@ -372,10 +377,10 @@ def deploy_project(neptune_json_path: str) -> dict[str, Any]:
         "-t",
         deployment.image,
         "-f",
-        "Dockerfile",
-        ".",
+        os.path.join(project_dir, "Dockerfile"),
+        build_context,
     ]
-    build_res = run_command(build_cmd, cwd=project_dir)
+    build_res = run_command(build_cmd)
     if not build_res.success:
         log.error(f"Image build failed: {build_res.stderr}")
         return {
