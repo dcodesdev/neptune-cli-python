@@ -380,7 +380,7 @@ def deploy_project(neptune_json_path: str, docker_context_path: str) -> dict[str
         os.path.join(project_dir, "Dockerfile"),
         build_context,
     ]
-    build_res = run_command(build_cmd)
+    build_res = run_command(build_cmd, cwd=build_context)
     if not build_res.success:
         log.error(f"Image build failed: {build_res.stderr}")
         return {
