@@ -4,6 +4,7 @@ $ErrorActionPreference = "Stop"
 $Repo = "dcodesdev/neptune-cli-python"
 $InstallDir = "$env:LOCALAPPDATA\Programs\neptune"
 $BinaryName = "neptune.exe"
+$MaxRetries = 5
 
 # Detect architecture
 $Arch = if ([Environment]::Is64BitOperatingSystem) { "amd64" } else { "x86" }
@@ -27,8 +28,27 @@ if (!(Test-Path $InstallDir)) {
 
 $TempFile = Join-Path $env:TEMP $BinaryName
 
-# Download binary
-Invoke-WebRequest -Uri $LatestUrl -OutFile $TempFile -UseBasicParsing
+# Download binary with retry mechanism
+$RetryCount = 0
+$Downloaded = $false
+
+while ($RetryCount -lt $MaxRetries -and -not $Downloaded) {
+    try {
+        Invoke-WebRequest -Uri $LatestUrl -OutFile $TempFile -UseBasicParsing
+        $Downloaded = $true
+    }
+    catch {
+        $RetryCount++
+        if ($RetryCount -lt $MaxRetries) {
+            Write-Host "Download failed. Retrying... (Attempt $($RetryCount + 1)/$MaxRetries)"
+            Start-Sleep -Seconds 2
+        }
+        else {
+            Write-Error "Download failed after $MaxRetries attempts"
+            throw
+        }
+    }
+}
 
 # Install
 Move-Item -Path $TempFile -Destination (Join-Path $InstallDir $BinaryName) -Force
