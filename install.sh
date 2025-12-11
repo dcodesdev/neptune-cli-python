@@ -50,7 +50,7 @@ trap 'rm -rf "$TMP_DIR"' EXIT
 # Download binary with retry mechanism
 RETRY_COUNT=0
 while [[ $RETRY_COUNT -lt $MAX_RETRIES ]]; do
-    if curl -fsSL "$LATEST_URL" -o "$TMP_DIR/$BINARY_NAME"; then
+    if curl -fsSL "$LATEST_URL" -o "$TMP_DIR/$BINARY_NAME" 2>/dev/null; then
         chmod +x "$TMP_DIR/$BINARY_NAME"
         break
     else
