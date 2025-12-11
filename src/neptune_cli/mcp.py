@@ -394,14 +394,18 @@ def deploy_project(neptune_json_path: str) -> dict[str, Any]:
         stderr=subprocess.STDOUT,
         cwd=project_dir,
     )
+    push_output = []
     for line in push_process.stdout:
-        log.info(line.decode().strip())
+        decoded = line.decode().strip()
+        push_output.append(decoded)
+        log.info(decoded)
     push_process.wait()
     if push_process.returncode != 0:
-        log.error("Image push failed")
+        error_output = "\n".join(push_output)
+        log.error(f"Image push failed: {error_output}")
         return {
             "status": "error",
-            "message": "image push failed",
+            "message": f"image push failed: {error_output}",
             "next_step": "check your Docker registry credentials and network connection, then try again",
         }
 
