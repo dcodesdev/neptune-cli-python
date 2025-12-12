@@ -23,9 +23,7 @@ class Client:
 
     def _get_headers(self) -> dict[str, str]:
         """Generate headers with bearer token if access_token is set."""
-        from importlib.metadata import version
-
-        headers = {"User-Agent": f"neptune-cli/{version('neptune-mcp')}"}
+        headers = {}
         if SETTINGS.access_token is not None:
             headers["Authorization"] = f"Bearer {SETTINGS.access_token}"
         return headers

@@ -707,11 +707,8 @@ async def info() -> dict[str, Any]:
     tools_list = await list_tools()
     tools_by_name = {tool["name"]: tool["description"] for tool in tools_list}
 
-    from importlib.metadata import version
-
     return {
         "status": "success",
-        "version": version("neptune-mcp"),
         "platform": f"Neptune (neptune.dev) - API Base URL: {SETTINGS.api_base_url.rstrip('/')}",
         "description": "Neptune is a cloud deployment platform that simplifies deploying and managing containerized applications with provisioned cloud resources.",
         "available_tools": {
