@@ -1,8 +1,5 @@
-import sys
-
 import click
 
-from neptune_mcp.version import check_for_update, get_current_version, is_running_as_binary
 from neptune_mcp.auth import serve_callback_handler
 from neptune_mcp.config import SETTINGS
 from neptune_mcp.mcp import mcp as mcp_server
@@ -55,44 +52,10 @@ def login():
 @cli.command()
 def version():
     """Display the current version of Neptune CLI"""
-    version = get_current_version()
+    from importlib.metadata import version as get_version
+
+    version = get_version("neptune-mcp")
     print(f"neptune {version}")
-
-
-@cli.command()
-@click.option("--check", is_flag=True, help="Check for updates without installing")
-def upgrade(check: bool):
-    """Check for and install updates to Neptune CLI"""
-    from neptune_cli.upgrade import perform_upgrade
-
-    current = get_current_version()
-    print(f"Current version: {current}")
-
-    print("Checking for updates...")
-    update_info = check_for_update()
-
-    if update_info is None:
-        print("Failed to check for updates. Please check your network connection.")
-        sys.exit(1)
-
-    if not update_info.update_available:
-        print("You are running the latest version")
-        return
-
-    print(f"New version available: {update_info.latest_version}")
-
-    if check:
-        print("Run 'neptune upgrade' to install the update")
-        return
-
-    if not is_running_as_binary():
-        print("Not running as a compiled binary")
-        return
-
-    if perform_upgrade(update_info, silent=False):
-        sys.exit(0)
-    else:
-        sys.exit(1)
 
 
 if __name__ == "__main__":

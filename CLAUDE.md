@@ -34,7 +34,7 @@ pre-commit run --all-files
 
 **Entry Points:**
 
--   `src/neptune_cli/cli.py` - Click-based CLI with commands: `mcp`, `login`, `version`, `upgrade`
+-   `src/neptune_cli/cli.py` - Click-based CLI with commands: `mcp`, `login`, `version`
 -   `src/neptune_cli/mcp.py` - FastMCP server exposing tools for AI assistants
 
 **Core Components:**
@@ -42,10 +42,9 @@ pre-commit run --all-files
 -   `client.py` - HTTP API client for Neptune backend
 -   `config.py` - Pydantic-based settings (stored in `~/.config/neptune/config.json`)
 -   `auth.py` - OAuth callback handler with local HTTP server
--   `version.py` / `upgrade.py` - Version checking and binary auto-update
 
 **MCP Tools (in `mcp.py`):**
-The MCP server exposes tools for the full deployment lifecycle: `get_project_schema`, `login`, `add_new_resource`, `provision_resources`, `deploy_project`, `get_deployment_status`, `get_logs`, `wait_for_deployment`, `set_secret_value`, `list_bucket_files`, `get_bucket_object`, `delete_project`, `upgrade_cli`, `info`
+The MCP server exposes tools for the full deployment lifecycle: `get_project_schema`, `login`, `add_new_resource`, `provision_resources`, `deploy_project`, `get_deployment_status`, `get_logs`, `wait_for_deployment`, `set_secret_value`, `list_bucket_files`, `get_bucket_object`, `delete_project`, `info`
 
 **Key Files:**
 

@@ -11,7 +11,6 @@ from neptune_common import (
 )
 import requests
 
-from neptune_mcp.version import get_current_version
 from neptune_mcp.config import SETTINGS
 
 
@@ -24,7 +23,9 @@ class Client:
 
     def _get_headers(self) -> dict[str, str]:
         """Generate headers with bearer token if access_token is set."""
-        headers = {"User-Agent": f"neptune-cli/{get_current_version()}"}
+        from importlib.metadata import version
+
+        headers = {"User-Agent": f"neptune-cli/{version('neptune-mcp')}"}
         if SETTINGS.access_token is not None:
             headers["Authorization"] = f"Bearer {SETTINGS.access_token}"
         return headers
